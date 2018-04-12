@@ -19,7 +19,6 @@ def get_data():
 
     ll = []
     for child in soup.tbody.children:
-
         if child == "\n":
             continue
 
@@ -47,7 +46,6 @@ def format_data():
     mn = -1 # X 轴的位置
     for index1, i in enumerate(data):
         if len(i) < len(title):
-            # print i
             mark['%s' % (mn+0.5)] = i
             continue
         else:
@@ -69,7 +67,6 @@ def format_data():
 
 
 def get_top_num_and_index(input_list, num, flag='max'):
-    # data, make = format_data()
     time = {}
     for index,i in enumerate(input_list):
         time[index] = float(i)*1000
@@ -86,8 +83,6 @@ def get_top_num_and_index(input_list, num, flag='max'):
 
 
 def save(plt):
-
-
     #---- rename
     # file_list = glob.glob('./crusader/*.png')
     # for i in file_list:
@@ -120,13 +115,9 @@ def plot():
 
     data, make = format_data()
 
-    # plt.figure(figsize=(7.5,4.5))
     plt.figure(figsize=(22,10), dpi=80)
     # plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['font.serif'] = ['consola']
-
-    # xz = range(0,100000)
-    # print data['all']
 
     #---------------------------------------------------------
     # idols 总数
@@ -140,8 +131,6 @@ def plot():
             '%.0f' % float(data['all'][i[0]]),
             ha='center',
             va='bottom')
-
-    # plt.plot(data['all'], 'b-o', label="all")
 
     #---------------------------------------------------------
     # boss
@@ -162,9 +151,7 @@ def plot():
             # 把 level 行替换成ms, 标识任务flag
             data['level'][index] = 'ms'
 
-    # plt.plot(data['idol_boss'], marker='o', label="boss")
     for index,i in enumerate(boss):
-        # plt.bar(range(len(boss)), boss)
         if i>20000:
             plt.bar(index, i, facecolor='#A108CD')
         else:
@@ -181,10 +168,12 @@ def plot():
         boss_not_zero[min_boss]+3500,
         '%s' % (boss_not_zero[min_boss]),
         ha='center', va='top', fontsize=8)
+
     #---------------------------------------------------------
     # map
     map_data = []
 
+    # 数据太小, 扩大比例
     plus = -25
 
     for i in data['map']:
@@ -196,8 +185,6 @@ def plot():
     show_data = []
     for i in map_data:
         show_data.append(int(i) - map_data[min_map] - 2000)
-
-    # plt.bar(range(len(map_data)), show_data, facecolor="#ff9999")
 
     color = [
         [0,     1000, '#FFE899'],
@@ -244,12 +231,17 @@ def plot():
     #---------------------------------------------------------
     # Y轴 make, buff name
     for k,v in make.iteritems():
-        plt.axvline(float(k), ls="--", c="gray", alpha=0.4)
         if len(v) > 1:
             s = v[0] + "\n" + v[1]
         else:
             s = v[0]
-        plt.text(float(k), 200000+1000, s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
+
+        if re.search(r'\*2', s):
+            plt.axvline(float(k), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
+            plt.text(float(k), 200000+1000, s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+        else:
+            plt.axvline(float(k), ls="--", c="gray", alpha=0.4)
+            plt.text(float(k), 200000+1000, s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
 
     #---------------------------------------------------------
     # idols 最大值, 最小值
@@ -325,7 +317,7 @@ def plot():
     # myfont = matplotlib.font_manager.FontProperties(fname='C:/Windows/Fonts/consola.ttf', size=11)
 
     first_legend = plt.legend(handles=[l_time, l_idol], loc=2,
-        bbox_to_anchor=(0, 0.95),
+        bbox_to_anchor=(0, 0.99),
         shadow=True,
         handlelength=5,
         # prop=myfont,
@@ -354,11 +346,4 @@ def plot():
 
 if __name__ == "__main__":
 
-    #
-
     plot()
-
-    # line_up, = plt.plot([], label='Line 2', linewidth =5)
-    # line_down, = plt.plot([], label='Line 1')
-    # plt.legend(handles=[line_up, line_down])
-    # plt.show()
