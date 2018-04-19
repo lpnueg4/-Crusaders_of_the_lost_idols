@@ -52,6 +52,8 @@ def format_data():
     mn = -1 # X 轴的位置
     for index1, i in enumerate(data):
         if len(i) < len(title):
+            # key, 特殊标记的位置 X坐标+0.5 位于2个条形之间
+            # i, 是一行的值, 数组, 只包含存在的值
             mark['%s' % (mn+0.5)] = i
             continue
         else:
@@ -121,6 +123,7 @@ def save(plt):
 
 def plot():
 
+    # 数据, 特殊标记(有空列的行)
     data, make = format_data()
 
     plt.figure(figsize=(26,10), dpi=80)
@@ -165,9 +168,11 @@ def plot():
         else:
             boss.append(0)
 
-        if re.search(r'ms', i):
+        # 没有写满的行, 都会加入make, 取的第一个存在的列, 并不是第一列
+        # if re.search(r'ms', i):
+            # 是以level列的值, 做的标记
             # 把 level 行替换成ms, 标识任务flag
-            data['level'][index] = 'ms'
+            # data['level'][index] = 'ms'
 
     for index,i in enumerate(boss):
         if i>20000:
@@ -233,28 +238,34 @@ def plot():
 
     #---------------------------------------------------------
     # X轴 make
-    plt.axhline(60000, ls="--", c="r", alpha=0.2)
 
-    # TODO 根据数据数量控制x轴位置
+    # 根据数据数量控制x轴位置
+    this_x = -(len(data['all'])-101)/2
+
+    plt.axhline(60000, ls="--", c="r", alpha=0.2)
     #          x     y
-    plt.text(-7.8, 60000, '60000',  color='r', fontsize=10, ha='center', va='center', alpha=0.7)
+    plt.text(this_x, 60000, '60000',  color='r', fontsize=10, ha='center', va='center', alpha=0.7)
 
     plt.axhline(40000, ls="--", c="g", alpha=0.2)
-    plt.text(-7.8, 40000, '40000',  color='g', fontsize=10, ha='center', va='center', alpha=0.7)
+    plt.text(this_x, 40000, '40000',  color='g', fontsize=10, ha='center', va='center', alpha=0.7)
 
-    # plt.axhline(20000, ls="--", c="b", alpha=0.1)
-    plt.axhline(0, ls="-", c="k", linewidth=0.5)
     # 24h line
     plt.axhline(24*1000+70000, ls="--", c="y", alpha=0.3)
-    plt.text(-6.8, 24*1000+70000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
+    plt.text(this_x, 24*1000+70000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
+
+    # 20000 line
+    # plt.axhline(20000, ls="--", c="b", alpha=0.1)
+
+    # 0 line
+    plt.axhline(0, ls="-", c="k", linewidth=0.5)
 
     #---------------------------------------------------------
     # Y轴 make, buff name
     for k,v in make.iteritems():
         if len(v) > 1:
-            s = v[0] + "\n" + v[1]
+            s = v[0] + "\n" + v[1] # 使用的是第一个值, 第二个值
         else:
-            s = v[0]
+            s = v[0] # 使用第一个非空值
 
         if re.search(r'\*2', s):
             plt.axvline(float(k), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
