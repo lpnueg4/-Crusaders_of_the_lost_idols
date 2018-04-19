@@ -240,7 +240,8 @@ def plot():
     # X轴 make
 
     # 根据数据数量控制x轴位置
-    this_x = -(len(data['all'])-101)/2
+    # this_x = -(len(data['all'])-101)/2
+    this_x = -(len(data['all'])*0.1-3.5)
 
     plt.axhline(60000, ls="--", c="r", alpha=0.2)
     #          x     y
