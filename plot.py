@@ -126,7 +126,8 @@ def plot():
     # 数据, 特殊标记(有空列的行)
     data, make = format_data()
 
-    plt.figure(figsize=(26,10), dpi=80)
+    # plt.figure(figsize=(28,14), dpi=80)
+    plt.figure(figsize=(26,11), dpi=80)
     # plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['font.serif'] = ['consola']
 
@@ -169,10 +170,10 @@ def plot():
             boss.append(0)
 
         # 没有写满的行, 都会加入make, 取的第一个存在的列, 并不是第一列
-        # if re.search(r'ms', i):
+        if re.search(r'ms', i):
             # 是以level列的值, 做的标记
             # 把 level 行替换成ms, 标识任务flag
-            # data['level'][index] = 'ms'
+            data['level'][index] = 'ms'
 
     for index,i in enumerate(boss):
         if i>20000:
@@ -250,9 +251,12 @@ def plot():
     plt.axhline(40000, ls="--", c="g", alpha=0.2)
     plt.text(this_x, 40000, '40000',  color='g', fontsize=10, ha='center', va='center', alpha=0.7)
 
+    plt.axhline(100000, ls="--", c="g", alpha=0.2)
+    # plt.text(this_x, 100000, '100000',  color='b', fontsize=10, ha='center', va='center', alpha=0.7)
+
     # 24h line
-    plt.axhline(24*1000+70000, ls="--", c="y", alpha=0.3)
-    plt.text(this_x, 24*1000+70000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
+    plt.axhline(170000, ls="--", c="y", alpha=0.3)
+    plt.text(this_x, 170000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
 
     # 20000 line
     # plt.axhline(20000, ls="--", c="b", alpha=0.1)
@@ -262,6 +266,7 @@ def plot():
 
     #---------------------------------------------------------
     # Y轴 make, buff name
+    bl = 270000
     for k,v in make.iteritems():
         if len(v) > 1:
             s = v[0] + "\n" + v[1] # 使用的是第一个值, 第二个值
@@ -270,10 +275,10 @@ def plot():
 
         if re.search(r'\*2', s):
             plt.axvline(float(k), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
-            plt.text(float(k), 200000+1000, s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+            plt.text(float(k), bl+1000, s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
         else:
             plt.axvline(float(k), ls="--", c="gray", alpha=0.4)
-            plt.text(float(k), 200000+1000, s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
+            plt.text(float(k), bl+1000, s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
 
     #---------------------------------------------------------
     # idols 最大值, 最小值
@@ -288,7 +293,7 @@ def plot():
         if re.search('et', i):
             plt.plot(index, data['all'][index],'o', c="#0FC20F")
         if re.search('ms', i):
-            plt.plot(index, data['all'][index],'o', c="r")
+            plt.plot(index, data['all'][index],'s', c="r")
 
     #---------------------------------------------------------
     # not 25%
@@ -299,7 +304,7 @@ def plot():
     #---------------------------------------------------------
     # time
     time = []
-    baseline = 100000
+    baseline = 170000
     for i in data['time(h)']:
         time.append(baseline+float(i)*1000)
     l_time, = plt.plot(time, marker='o', label="time")
