@@ -16,6 +16,9 @@ import zipfile
 DES_FILE = 'D:\PY\plot\data.zip'
 
 def get_data():
+    '''
+        从html里面读取数据
+    '''
     fn = "%s/%s" % (DES_FILE + "_files", "index.html")
 
     with open(fn, "rb") as f:
@@ -43,6 +46,9 @@ def get_data():
 
 
 def format_data():
+    '''
+        处理数据
+    '''
     data = get_data()
 
     title = data.pop(0)
@@ -75,6 +81,9 @@ def format_data():
 
 
 def get_top_num_and_index(input_list, num, flag='max', space=0):
+    '''
+        获取数组 最大or最小 的前N个
+    '''
     time = {}
     for index,i in enumerate(input_list):
         time[index] = float(i)*1000
@@ -93,6 +102,10 @@ def get_top_num_and_index(input_list, num, flag='max', space=0):
 
 
 def save(plt):
+    '''
+        保存图片
+    '''
+
     #---- rename
     # file_list = glob.glob('./crusader/*.png')
     # for i in file_list:
@@ -127,7 +140,7 @@ def plot():
     data, make = format_data()
 
     # plt.figure(figsize=(28,14), dpi=80)
-    plt.figure(figsize=(26,11), dpi=80)
+    plt.figure(figsize=(28,11), dpi=80)
     # plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['font.serif'] = ['consola']
 
@@ -135,6 +148,7 @@ def plot():
     # idols 总数
 
     l_idol, = plt.plot(data['all'], marker='o', label="idol")
+    # l_idol, = plt.plot(data['all'], marker=None, label="idol")
 
     # top 5
     top_idols = get_top_num_and_index(data['all'], 5)
@@ -155,7 +169,7 @@ def plot():
             space_flag = i[0]
 
     #---------------------------------------------------------
-    # boss
+    # boss奖励idols
     boss = []
     boss_not_zero = []
     for index,i in enumerate(data['idol_boss']):
@@ -175,11 +189,29 @@ def plot():
             # 把 level 行替换成ms, 标识任务flag
             data['level'][index] = 'ms'
 
+    # for index,i in enumerate(boss):
+    #     if i>20000:
+    #         plt.bar(index, i, facecolor='#A108CD')
+    #     else:
+    #         plt.bar(index, i, facecolor='#1F77B4')
+
+    color = [
+        [0,      20000, '#A108CD'],
+        [20001,  30000, '#1F77B4'],
+        [30001,  60000, '#FFC90E'],
+        # [40001,  60000, '#FFC90E'],
+        [60001,  80000, '#ED1C24'],
+    ]
+
     for index,i in enumerate(boss):
-        if i>20000:
-            plt.bar(index, i, facecolor='#A108CD')
-        else:
-            plt.bar(index, i, facecolor='#1F77B4')
+        for c in color:
+            if c[0] <= i <= c[1]:
+                plt.bar(index, i, facecolor=c[2])
+
+    color_legend_boss = []
+    for c in color:
+        tmp, = plt.plot([], linewidth=8, color=c[2], label="%s-%s" % (c[0], c[1]), alpha=1)
+        color_legend_boss.append(tmp)
 
     max_boss = boss.index(max(boss))
     min_boss = boss_not_zero.index(min(boss_not_zero))
@@ -215,6 +247,8 @@ def plot():
         [1001,  1100, '#AA99FF'],
         [1101,  1200, '#FF9999'],
         [1201,  1300, '#7BA975'],
+        # [1301,  1400, '#FFC90E'],
+        [1301,  1400, '#99D9EA'],
     ]
 
     for index,i in enumerate(map_data):
@@ -222,7 +256,7 @@ def plot():
             if c[0] <= (i/plus) <= c[1]:
                 tmp = plt.bar(index, show_data[index], facecolor=c[2])
 
-    # for legend
+    # for legend, 绘制没有点的线, 为了让图例中显示出bar的颜色
     color_legend = []
     for c in color:
         tmp, = plt.plot([], linewidth=8, color=c[2], label="%s-%s" % (c[0], c[1]), alpha=1)
@@ -242,7 +276,7 @@ def plot():
 
     # 根据数据数量控制x轴位置
     # this_x = -(len(data['all'])-101)/2
-    this_x = -(len(data['all'])*0.1-3.5)
+    this_x = -(len(data['all'])*0.05+3)
 
     plt.axhline(60000, ls="--", c="r", alpha=0.2)
     #          x     y
@@ -351,34 +385,59 @@ def plot():
 
     # myfont = matplotlib.font_manager.FontProperties(fname='C:/Windows/Fonts/consola.ttf', size=11)
 
+    # boss奖励, 图例
+    second_legend = plt.legend(handles=color_legend_boss, loc=3, shadow=True,
+        bbox_to_anchor=(0, -0.08),
+        handletextpad=1,    # text padding
+        handlelength=4,     # line length
+        borderpad=0.8,      # border padding
+        ncol=5,
+        # title='map',
+        )
+    plt.gca().add_artist(second_legend)
+
+    # 图例, 两个主线
     first_legend = plt.legend(handles=[l_time, l_idol], loc=2,
         bbox_to_anchor=(0, 0.99),
         shadow=True,
         handlelength=5,
         # prop=myfont,
         )
+
+    # 多图例写法
     plt.gca().add_artist(first_legend)
 
     # plt.legend(handles=color_legend, bbox_to_anchor=(1, 1))
     # plt.legend(handles=color_legend, loc=2, fontsize='small')
+
+    # 地图, 图例
+    # bbox_to_anchor(x[百分比位置], y[百分比位置]),
+    # x 大于 1 时候, 将出现在x轴右侧
+    # y 小于 1 时候, 将出现在y轴下侧
     plt.legend(handles=color_legend, loc=3, shadow=True,
-        bbox_to_anchor=(0, 0.01),
+        bbox_to_anchor=(0, -0.135),
         handletextpad=1,    # text padding
         handlelength=4,     # line length
         borderpad=0.8,      # border padding
-        ncol=5)
+        ncol=5,
+        # title='map',
+        )
 
     #---------------------------------------------------------
 
     top = baseline + 100000
 
-    plt.ylim(-45000, top)
+    # y轴下限, 想把图例放在图标内部, 需要提高下限
+    plt.ylim(-40000, top)
 
     # plt.show()  #显示画布
 
     save(plt)
 
     print "plot over."
+
+    #TODO, 拆分成小方法
+
 
 def copy():
     src = 'D:\Documents\My Knowledge\Data\lpnueg@163.com\Game\Crusaders of the Lost Idols\idols 计算.ziw'.decode('u8')
