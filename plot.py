@@ -124,13 +124,21 @@ def save(plt):
     file_list = glob.glob('./crusader/%s_*.png' % prefix)
     num_list = []
     path = None
+
     for i in file_list:
         if not path:
             path = os.path.dirname(i)
         num = re.search(r'%s_(\d+)' % prefix, i).group(1)
         num_list.append(int(num))
 
-    new_num = max(num_list) + 1
+    if path == None:
+        path = '.'
+
+    if len(num_list) > 0:
+        new_num = max(num_list) + 1
+    else:
+        new_num = 0
+
     plt.savefig(path + os.sep + "%s_%s.png" % (prefix, new_num))
 
 
