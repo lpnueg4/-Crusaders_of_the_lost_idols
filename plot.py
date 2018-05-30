@@ -2,7 +2,7 @@
 
 from pprint import pprint
 from bs4 import BeautifulSoup
-import numpy as np
+# import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager
 import re
@@ -54,13 +54,16 @@ def format_data():
     title = data.pop(0)
 
     dd = {}
-    mark = {}
-    mn = -1 # X 轴的位置
+    # 为了使mark有顺序, 一上一下
+    mark = []
+    # X 轴的位置
+    mn = -1
     for index1, i in enumerate(data):
         if len(i) < len(title):
             # key, 特殊标记的位置 X坐标+0.5 位于2个条形之间
             # i, 是一行的值, 数组, 只包含存在的值
-            mark['%s' % (mn+0.5)] = i
+            # mark['%s' % (mn+0.5)] = i
+            mark.append(['%s' % (mn+0.5), i])
             continue
         else:
             mn = mn + 1
@@ -118,28 +121,35 @@ def save(plt):
     #         num = g.group(1)
     #         os.renames(i, path + os.sep + "%s.png" % num)
 
-    prefix = 'big'
+    prefix = 't5'
 
     #---- save to png
     file_list = glob.glob('./crusader/%s_*.png' % prefix)
     num_list = []
     path = None
-
     for i in file_list:
         if not path:
             path = os.path.dirname(i)
         num = re.search(r'%s_(\d+)' % prefix, i).group(1)
         num_list.append(int(num))
 
-    if path == None:
-        path = '.'
-
-    if len(num_list) > 0:
-        new_num = max(num_list) + 1
-    else:
+    if len(num_list) == 0:
         new_num = 0
+    else:
+        new_num = max(num_list) + 1
 
-    plt.savefig(path + os.sep + "%s_%s.png" % (prefix, new_num))
+    if not os.path.isdir("./crusader"):
+        path = '.'
+        file_name = 'show.png'
+        save_path = "%s%s%s" % (path, os.sep, file_name)
+    else:
+        path = "./crusader"
+        file_name = "%s_%s.png" % (prefix, new_num)
+        save_path = "%s%s%s" % (path, os.sep, file_name)
+
+    print "save file to %s" % save_path
+
+    plt.savefig(save_path)
 
 
 def plot():
@@ -148,7 +158,8 @@ def plot():
     data, make = format_data()
 
     # plt.figure(figsize=(28,14), dpi=80)
-    plt.figure(figsize=(28,11), dpi=80)
+    # (长, 宽)
+    plt.figure(figsize=(32,11), dpi=80)
     # plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['font.serif'] = ['consola']
 
@@ -169,7 +180,7 @@ def plot():
         if i[0]>space_flag+3 or i[0]<space_flag-3:
             # print data['all'][i[0]]
             plt.text(i[0],
-                data['all'][i[0]]+1500,
+                data['all'][i[0]]+4500,
                 '%.0f' % float(data['all'][i[0]]),
                 ha='center',
                 va='bottom')
@@ -204,17 +215,21 @@ def plot():
     #         plt.bar(index, i, facecolor='#1F77B4')
 
     color = [
-        [0,      20000, '#A108CD'],
-        [20001,  30000, '#1F77B4'],
-        [30001,  60000, '#FFC90E'],
-        # [40001,  60000, '#FFC90E'],
-        [60001,  80000, '#ED1C24'],
+        [0,         20000, '#A108CD'],
+        [20001,     30000, '#1F77B4'],
+        [30001,     60000, '#FFC90E'],
+        [60001,     100000, '#ED1C24'],
+        [100001,    150000, '#7F7F7F'],
     ]
 
     for index,i in enumerate(boss):
+        # 每循环一个颜色, 上一次色, 用else的话, 会盖掉前面的颜色, 加了break
         for c in color:
             if c[0] <= i <= c[1]:
                 plt.bar(index, i, facecolor=c[2])
+                break
+            else:
+                plt.bar(index, i, facecolor='black')
 
     color_legend_boss = []
     for c in color:
@@ -225,11 +240,11 @@ def plot():
     min_boss = boss_not_zero.index(min(boss_not_zero))
 
     plt.text(max_boss,
-        boss[max_boss]+3500,
+        boss[max_boss]+9500,
         '%s' % (boss[max_boss]),
         ha='center', va='top', fontsize=8)
     plt.text(min_boss,
-        boss_not_zero[min_boss]+3500,
+        boss_not_zero[min_boss]+9500,
         '%s' % (boss_not_zero[min_boss]),
         ha='center', va='top', fontsize=8)
 
@@ -238,7 +253,7 @@ def plot():
     map_data = []
 
     # 数据太小, 扩大比例
-    plus = -25
+    plus = -35
 
     for i in data['map']:
         map_data.append(int(i) * plus)
@@ -257,6 +272,7 @@ def plot():
         [1201,  1300, '#7BA975'],
         # [1301,  1400, '#FFC90E'],
         [1301,  1400, '#99D9EA'],
+        [1401,  1600, '#FC9E5D'],
     ]
 
     for index,i in enumerate(map_data):
@@ -271,11 +287,11 @@ def plot():
         color_legend.append(tmp)
 
     plt.text(max_map,
-        show_data[max_map]-1000,
+        show_data[max_map]-3000,
         '%s' % (map_data[max_map] / plus),
         ha='center', va='top', fontsize=8)
     plt.text(min_map,
-        show_data[min_map]-1000,
+        show_data[min_map]-3000,
         '%s' % (map_data[min_map] / plus),
         ha='center',va='top', fontsize=8)
 
@@ -290,15 +306,15 @@ def plot():
     #          x     y
     plt.text(this_x, 60000, '60000',  color='r', fontsize=10, ha='center', va='center', alpha=0.7)
 
-    plt.axhline(40000, ls="--", c="g", alpha=0.2)
-    plt.text(this_x, 40000, '40000',  color='g', fontsize=10, ha='center', va='center', alpha=0.7)
+    # plt.axhline(40000, ls="--", c="g", alpha=0.2)
+    # plt.text(this_x, 40000, '40000',  color='g', fontsize=10, ha='center', va='center', alpha=0.7)
 
     plt.axhline(100000, ls="--", c="g", alpha=0.2)
     # plt.text(this_x, 100000, '100000',  color='b', fontsize=10, ha='center', va='center', alpha=0.7)
 
     # 24h line
-    plt.axhline(170000, ls="--", c="y", alpha=0.3)
-    plt.text(this_x, 170000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
+    plt.axhline(200000, ls="--", c="y", alpha=0.3)
+    plt.text(this_x, 200000, 'time 0',  color='y', fontsize=10, ha='center', va='center', alpha=0.7)
 
     # 20000 line
     # plt.axhline(20000, ls="--", c="b", alpha=0.1)
@@ -308,19 +324,27 @@ def plot():
 
     #---------------------------------------------------------
     # Y轴 make, buff name
-    bl = 270000
-    for k,v in make.iteritems():
-        if len(v) > 1:
-            s = v[0] + "\n" + v[1] # 使用的是第一个值, 第二个值
+    bl = [710000, 690000]
+    tt = 0
+    # for k,v in make.iteritems():
+    for i in make:
+        if len(i[1]) > 1:
+            s = i[1][0] + "\n" + i[1][1] # 使用的是第一个值, 第二个值
         else:
-            s = v[0] # 使用第一个非空值
+            s = i[1][0] # 使用第一个非空值
 
+        # idols*2
         if re.search(r'\*2', s):
-            plt.axvline(float(k), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
-            plt.text(float(k), bl+1000, s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+            plt.axvline(float(i[0]), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
+            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+        elif re.search(r'T5', s):
+            plt.axvline(float(i[0]), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
+            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
         else:
-            plt.axvline(float(k), ls="--", c="gray", alpha=0.4)
-            plt.text(float(k), bl+1000, s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
+            plt.axvline(float(i[0]), ls="--", c="gray", alpha=0.4)
+            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
+
+        tt += 1
 
     #---------------------------------------------------------
     # idols 最大值, 最小值
@@ -340,15 +364,17 @@ def plot():
     #---------------------------------------------------------
     # not 25%
     for index, i in enumerate(data['idol_buff']):
-        if int(i[:-1]) == 0:
+        a = i.replace('%', '')
+        if int(a) == 0:
             plt.plot(index, data['all'][index],'rx', markersize=8)
 
     #---------------------------------------------------------
     # time
     time = []
-    baseline = 170000
+    baseline = 200000
     for i in data['time(h)']:
-        time.append(baseline+float(i)*1000)
+        # 扩大比例
+        time.append(baseline+float(i)*3000)
     l_time, = plt.plot(time, marker='o', label="time")
 
     # time text
@@ -364,14 +390,14 @@ def plot():
 
     for i in top_time:
         plt.text(i[0],
-            time[i[0]]+1500,
+            time[i[0]]+4500,
             '%.2f' % float(data['time(h)'][i[0]]),
             ha='center',
             va='bottom')
 
     for i in below_time:
         plt.text(i[0],
-            time[i[0]]-3000,
+            time[i[0]]-8000,
             '%.2f' % float(data['time(h)'][i[0]]),
             ha='center',
             va='top')
@@ -427,16 +453,16 @@ def plot():
         handletextpad=1,    # text padding
         handlelength=4,     # line length
         borderpad=0.8,      # border padding
-        ncol=5,
+        ncol=9,             # 每行个数
         # title='map',
         )
 
     #---------------------------------------------------------
-
-    top = baseline + 100000
+    # top line
+    top = baseline + 480000
 
     # y轴下限, 想把图例放在图标内部, 需要提高下限
-    plt.ylim(-40000, top)
+    plt.ylim(-95000, top)
 
     # plt.show()  #显示画布
 
