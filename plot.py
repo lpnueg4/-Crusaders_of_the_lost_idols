@@ -324,7 +324,8 @@ def plot():
 
     #---------------------------------------------------------
     # Y轴 make, buff name
-    bl = [710000, 690000]
+    bl = [730000, 710000, 690000]
+    cl = ['#4EA9D8', '#DFC650', '#E190F0']
     tt = 0
     # for k,v in make.iteritems():
     for i in make:
@@ -336,13 +337,13 @@ def plot():
         # idols*2
         if re.search(r'\*2', s):
             plt.axvline(float(i[0]), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
-            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
-        elif re.search(r'T5', s):
+            plt.text(float(i[0]), bl[tt%3], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+        elif re.search(r'T4.*T5', s):
             plt.axvline(float(i[0]), ls="-", c="r", marker='o', markersize = 25, alpha=0.5)
-            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
+            plt.text(float(i[0]), bl[tt%3], s, fontsize=10, color='r', ha='center', va='bottom', alpha=0.5)
         else:
             plt.axvline(float(i[0]), ls="--", c="gray", alpha=0.4)
-            plt.text(float(i[0]), bl[tt%2], s, fontsize=10, color='gray', ha='center', va='bottom', alpha=0.5)
+            plt.text(float(i[0]), bl[tt%3], s, fontsize=10, color=cl[tt%3], ha='center', va='bottom', alpha=0.5)
 
         tt += 1
 
